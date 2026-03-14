@@ -15,8 +15,9 @@ El sistema fue desarrollado utilizando **Java Web (Servlets y JSP)**, ejecutado 
 
 # 📌 Características
 
-- Registro de usuarios
+- Inicio
 - Listado de usuarios
+- Nuevo usuario
 - Edición de usuarios
 - Eliminación de usuarios
 - Conexión a base de datos MySQL
@@ -42,35 +43,49 @@ El sistema fue desarrollado utilizando **Java Web (Servlets y JSP)**, ejecutado 
 
 # 🏗 Arquitectura del proyecto
 
-El proyecto sigue el patrón **MVC (Model - View - Controller)**.
+El proyecto sigue el patrón **MVC (Model - View - Controller)** y está organizado según la estructura generada por **NetBeans para aplicaciones Java Web**.
 
 ```
-EcoStoreShoe
+EcommerceStoreShoe
 │
-├── src
-│   ├── modelo
-│   │   └── Usuario.java
+├── Web Pages
+│   │
+│   ├── META-INF
+│   │
+│   ├── WEB-INF
+│   │
+│   ├── includes
+│   │   ├── footer.jsp
+│   │   └── menu.jsp
+│   │
+│   ├── usuarios
+│   │   ├── agregar.jsp
+│   │   ├── editar.jsp
+│   │   └── usuarios.jsp
+│   │
+│   └── index.html
+│
+├── Source Packages
+│   │
+│   ├── conexion
+│   │   └── ConexionDB.java
 │   │
 │   ├── dao
 │   │   └── UsuarioDAO.java
 │   │
-│   ├── conexion
-│   │   └── ConexionBD.java
+│   ├── modelo
+│   │   └── Usuario.java
 │   │
-│   └── servlet
+│   └── principal
 │       └── UsuarioServlet.java
 │
-├── web
-│   ├── usuarios
-│   │   ├── listarUsuarios.jsp
-│   │   ├── agregarUsuario.jsp
-│   │   └── editarUsuario.jsp
+├── Libraries
+│   ├── mysql-connector-j-9.6.0.jar
+│   ├── JDK 25
+│   └── Apache Tomcat
 │
-└── WEB-INF
-    └── web.xml
+└── Configuration Files
 ```
-
----
 
 # 🗄 Base de datos
 
@@ -133,10 +148,18 @@ public class ConexionBD {
 
 ## 1. Clonar el repositorio
 
+HTTPS:
 ```bash
-git clone https://github.com/tu-usuario/eco-store-shoe.git
+git clone https://github.com/bdiaz747/Ecommers-Store-Shoe-CRUB-Usuarios.git
 ```
-
+SSH:
+```bash
+git clone git@github.com:bdiaz747/Ecommers-Store-Shoe-CRUB-Usuarios.git
+```
+GibHub CLI:
+```bash
+gh repo clone bdiaz747/Ecommers-Store-Shoe-CRUB-Usuarios
+```
 ---
 
 ## 2. Crear la base de datos
@@ -169,23 +192,28 @@ http://localhost:8080/EcoStoreShoe
 
 # 📷 Capturas del sistema
 
-```
-screenshots/
-    inicio_strore_shoe.png
-    lista_usuarios.png
-    crear_usuario.png
-    editar_usuario.png
-```
-
-Luego agregarlas en el README:
-
-```
+## Inicio
+![Lista de usuarios](inicio_strore_shoe.jpg)
 ## Lista de usuarios
 
-![Lista de usuarios](screenshots/lista_usuarios.png)
-```
+![Lista de usuarios](lista_usuarios.jpg)
 
----
+## Crear usuario
+
+![Crear usuario](crear_usuario.jpg)
+
+## Editar usuario
+
+![Editar usuario](editar_usuario.jpg)
+
+## Base de Datos 
+
+![Bse de Datos](BS_eco_store.jpg)
+
+## Eliminar Usuario
+
+![Eleminar Usuario](eleminar_usuario.jpg)
+
 
 # 📚 Objetivo del proyecto
 
@@ -203,7 +231,7 @@ Este proyecto fue desarrollado con fines **académicos**, aplicando conceptos de
 
 **Brahian Díaz García**
 
-Proyecto académico – SENA
+Proyecto académico – SENA - 2026
 
 ---
 
