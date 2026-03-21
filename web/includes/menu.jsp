@@ -61,7 +61,7 @@ if(msg != null){
             <div class="flex space-x-6">
 
                 <!-- Link hacia la página de inicio -->
-                <a href="../index.html"
+                <a href="../EcommerceStoreShoe/index.jsp"
                    class="text-gray-300 hover:text-white">
 
                     Inicio
@@ -69,7 +69,7 @@ if(msg != null){
                 </a>
 
                 <!-- Link hacia la lista de usuarios -->
-                <a href="../usuarios/usuarios.jsp"
+                <a href="${pageContext.request.contextPath}/UsuarioServlet?accion=listar"
                    class="text-gray-300 hover:text-white">
 
                     Usuarios

@@ -1,127 +1,129 @@
 // Paquete donde se encuentra el servlet
 package principal;
 
-// Importa la clase UsuarioDAO que contiene los métodos para trabajar con la base de datos
+// Importa la clase UsuarioDAO
 import dao.UsuarioDAO;
 
-// Importa el modelo Usuario que representa la tabla usuarios
+// Importa el modelo Usuario
 import modelo.Usuario;
 
-// Importaciones necesarias para trabajar con Servlets
+// Importaciones de servlet
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-// Importación para manejar errores de entrada/salida
+// Importación de IOException
 import java.io.IOException;
 
-// Define la URL con la que se llamará el servlet desde el navegador o formulario
+// Importación para listas
+import java.util.List;
+
+// URL del servlet
 @WebServlet("/UsuarioServlet")
 
-// La clase UsuarioServlet hereda de HttpServlet
-// Esto permite que funcione como un servlet web
 public class UsuarioServlet extends HttpServlet {
 
-    // Se crea un objeto del DAO para poder usar los métodos de la base de datos
+    // Instancia del DAO
     UsuarioDAO dao = new UsuarioDAO();
 
-    // Método que se ejecuta cuando el formulario envía datos con método POST
+    // ==========================================
+    // MÉTODO GET (LISTAR USUARIOS Y NUEVO USUARIO)
+    // ==========================================
+ @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        try {
+
+            String accion = request.getParameter("accion");
+
+            if (accion == null) {
+                accion = "listar";
+            }
+
+            switch (accion) {
+
+                case "listar":
+
+                    List<Usuario> lista = dao.listar();
+
+                    request.setAttribute("usuarios", lista);
+
+                    request.getRequestDispatcher("usuarios/usuarios.jsp")
+                            .forward(request, response);
+                    break;
+
+                case "nuevo":
+
+                    // Solo abre el formulario
+                    request.getRequestDispatcher("usuarios/agregar.jsp")
+                            .forward(request, response);
+                    break;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.getWriter().println("Error en doGet: " + e.getMessage());
+        }
+    }
+
+    // ==========================================
+    // MÉTODO POST (CRUD)
+    // ==========================================
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         try {
 
-            // Se obtiene el parámetro "accion" enviado desde el formulario
-            // Este parámetro indica qué operación se quiere realizar
+            // Obtiene la acción
             String accion = request.getParameter("accion");
 
-            // Si no viene ninguna acción, el método termina
             if (accion == null) {
                 return;
             }
 
-            // Estructura switch para evaluar qué acción se va a ejecutar
             switch (accion) {
 
-                // ==========================================
-                // ACCIÓN: GUARDAR USUARIO
-                // ==========================================
                 case "guardar":
 
-                    // Se crea un objeto del modelo Usuario
                     Usuario u1 = new Usuario();
 
-                    // Se obtiene el valor del campo "nombre" enviado desde el formulario
-                    // y se guarda en el objeto Usuario
                     u1.setNombre(request.getParameter("nombre"));
-
-                    // Se obtiene el valor del campo "correo"
                     u1.setCorreo(request.getParameter("correo"));
-
-                    // Se obtiene el valor del campo "clave"
                     u1.setClave(request.getParameter("clave"));
 
-                    // Se llama al método insertar del DAO para guardar el usuario en la base de datos
                     dao.insertar(u1);
 
-                    // Se redirige al archivo listar.jsp donde se muestran los usuarios
-                    response.sendRedirect("usuarios/usuarios.jsp?msg=creado");
-
-                    // break evita que el programa siga ejecutando otros casos del switch
+                    response.sendRedirect("UsuarioServlet");
                     break;
 
-                // ==========================================
-                // ACCIÓN: ACTUALIZAR USUARIO
-                // ==========================================
                 case "actualizar":
 
-                    // Se crea otro objeto Usuario
                     Usuario u2 = new Usuario();
 
-                    // Se obtiene el id enviado desde el formulario
-                    // Integer.parseInt convierte el texto a número
                     u2.setId(Integer.parseInt(request.getParameter("id")));
-
-                    // Se obtiene el nuevo nombre
                     u2.setNombre(request.getParameter("nombre"));
-
-                    // Se obtiene el nuevo correo
                     u2.setCorreo(request.getParameter("correo"));
-
-                    // Se obtiene la nueva clave
                     u2.setClave(request.getParameter("clave"));
 
-                    // Se llama al método actualizar del DAO
                     dao.actualizar(u2);
 
-                    // Se redirige nuevamente a la lista de usuarios
-                    response.sendRedirect("usuarios/usuarios.jsp?msg=actualizado");
-                    // Termina este caso
+                    response.sendRedirect("UsuarioServlet");
                     break;
 
-                // ==========================================
-                // ACCIÓN: ELIMINAR USUARIO
-                // ==========================================
                 case "eliminar":
 
-                    // Se obtiene el id del usuario que se quiere eliminar
                     int id = Integer.parseInt(request.getParameter("id"));
 
-                    // Se llama al método eliminar del DAO
                     dao.eliminar(id);
 
-                    // Se vuelve a cargar la lista de usuarios
-                    response.sendRedirect("usuarios/usuarios.jsp?msg=eliminado");
-
-                    // Termina este caso
+                    response.sendRedirect("UsuarioServlet");
                     break;
             }
 
         } catch (Exception e) {
-
-            // Si ocurre algún error se muestra en la consola
             e.printStackTrace();
         }
     }

@@ -142,7 +142,7 @@ Actualizar
 </button>
 
 
-<a href="usuarios.jsp">
+<a href="${pageContext.request.contextPath}/UsuarioServlet?accion=listar">
 
 <button
     type="button"

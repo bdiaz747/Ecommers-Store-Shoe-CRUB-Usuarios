@@ -45,7 +45,7 @@ Crear Nuevo Usuario
 <%-- FORMULARIO DE REGISTRO --%>
 <%-- =============================== --%>
 
-<form action="../UsuarioServlet" method="POST">
+<form action="${pageContext.request.contextPath}/UsuarioServlet" method="POST">
 
 
 <%-- Campo oculto que indica al servlet qué acción ejecutar --%>
@@ -125,7 +125,7 @@ Guardar
 
 
 <%-- BOTÓN CANCELAR --%>
-<a href="usuarios.jsp">
+<a href="${pageContext.request.contextPath}/UsuarioServlet?accion=listar">
 
 <button
     type="button"
