@@ -43,48 +43,71 @@ El sistema fue desarrollado utilizando **Java Web (Servlets y JSP)**, ejecutado 
 
 # 🏗 Arquitectura del proyecto
 
-El proyecto sigue el patrón **MVC (Model - View - Controller)** y está organizado según la estructura generada por **NetBeans para aplicaciones Java Web**.
+El proyecto sigue el patrón **MVC (Model - View - Controller)**:
+
+- **Modelo (Model):**
+  - `Usuario.java`
+  - Representa la entidad de usuario.
+
+- **Vista (View):**
+  - Archivos `.jsp` en `usuarios/`
+  - Carpeta `includes/` (menú y footer)
+
+- **Controlador (Controller):**
+  - `UsuarioServlet.java`
+  - Maneja las peticiones HTTP
+
+- **Acceso a datos (DAO):**
+  - `UsuarioDAO.java`
+  - Encargado de interactuar con la base de datos
+
+- **Lógica de negocio (Service):**
+  - `UsuarioService.java`
+  - Intermediario entre Servlet y DAO
 
 ```
-EcommerceStoreShoe
+EcommerceStoreShoe/
 │
-├── Web Pages
+├── Web Pages/
 │   │
-│   ├── META-INF
+│   ├── META-INF/
 │   │
-│   ├── WEB-INF
+│   ├── WEB-INF/
 │   │
-│   ├── includes
+│   ├── includes/
 │   │   ├── footer.jsp
 │   │   └── menu.jsp
 │   │
-│   ├── usuarios
+│   ├── usuarios/
 │   │   ├── agregar.jsp
 │   │   ├── editar.jsp
 │   │   └── usuarios.jsp
 │   │
-│   └── index.html
+│   └── index.jsp
 │
-├── Source Packages
+├── Source Packages/
 │   │
-│   ├── conexion
+│   ├── conexion/
 │   │   └── ConexionDB.java
 │   │
-│   ├── dao
+│   ├── dao/
 │   │   └── UsuarioDAO.java
 │   │
-│   ├── modelo
+│   ├── modelo/
 │   │   └── Usuario.java
 │   │
-│   └── principal
+│   ├── service/
+│   │   └── UsuarioService.java
+│   │
+│   └── principal/
 │       └── UsuarioServlet.java
 │
-├── Libraries
+├── Libraries/
 │   ├── mysql-connector-j-9.6.0.jar
-│   ├── JDK 25
-│   └── Apache Tomcat
+│   ├── JDK 25 (Default)
+│   └── Apache Tomcat / TomEE
 │
-└── Configuration Files
+└── Configuration Files/
 ```
 
 # 🗄 Base de datos

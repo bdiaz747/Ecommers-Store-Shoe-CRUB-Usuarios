@@ -1,43 +1,40 @@
-// Paquete donde se encuentra el servlet
+// EDitado por Brahian Díaz G, 21-MAR-2026
+
 package principal;
+// Define el paquete del servlet
 
-// Importa la clase UsuarioDAO
-import dao.UsuarioDAO;
+import service.UsuarioService;
+// Importa la capa de servicio
 
-// Importa el modelo Usuario
 import modelo.Usuario;
+// Importa el modelo Usuario
 
-// Importaciones de servlet
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-// Importación de IOException
 import java.io.IOException;
-
-// Importación para listas
 import java.util.List;
 
-// URL del servlet
 @WebServlet("/UsuarioServlet")
+// Define la URL del servlet
 
 public class UsuarioServlet extends HttpServlet {
 
-    // Instancia del DAO
-    UsuarioDAO dao = new UsuarioDAO();
+    UsuarioService service = new UsuarioService();
+    // Instancia del servicio
 
-    // ==========================================
-    // MÉTODO GET (LISTAR USUARIOS Y NUEVO USUARIO)
-    // ==========================================
- @Override
+
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         try {
 
             String accion = request.getParameter("accion");
+            // Obtiene la acción
 
             if (accion == null) {
                 accion = "listar";
@@ -47,9 +44,11 @@ public class UsuarioServlet extends HttpServlet {
 
                 case "listar":
 
-                    List<Usuario> lista = dao.listar();
+                    List<Usuario> lista = service.listarUsuarios();
+                    // Obtiene la lista de usuarios
 
                     request.setAttribute("usuarios", lista);
+                    // Envía la lista a la vista
 
                     request.getRequestDispatcher("usuarios/usuarios.jsp")
                             .forward(request, response);
@@ -57,8 +56,22 @@ public class UsuarioServlet extends HttpServlet {
 
                 case "nuevo":
 
-                    // Solo abre el formulario
                     request.getRequestDispatcher("usuarios/agregar.jsp")
+                            .forward(request, response);
+                    break;
+
+                case "editar":
+
+                    int id = Integer.parseInt(request.getParameter("id"));
+                    // Obtiene el ID
+
+                    Usuario usuario = service.obtenerUsuario(id);
+                    // Busca el usuario
+
+                    request.setAttribute("usuario", usuario);
+                    // Envía el usuario a la vista
+
+                    request.getRequestDispatcher("usuarios/editar.jsp")
                             .forward(request, response);
                     break;
             }
@@ -69,16 +82,15 @@ public class UsuarioServlet extends HttpServlet {
         }
     }
 
-    // ==========================================
-    // MÉTODO POST (CRUD)
-    // ==========================================
+
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         try {
 
-            // Obtiene la acción
             String accion = request.getParameter("accion");
+            // Obtiene la acción
 
             if (accion == null) {
                 return;
@@ -88,16 +100,20 @@ public class UsuarioServlet extends HttpServlet {
 
                 case "guardar":
 
-                    Usuario u1 = new Usuario();
+    Usuario u1 = new Usuario();
 
-                    u1.setNombre(request.getParameter("nombre"));
-                    u1.setCorreo(request.getParameter("correo"));
-                    u1.setClave(request.getParameter("clave"));
+    u1.setNombre(request.getParameter("nombre"));
+    u1.setCorreo(request.getParameter("correo"));
+    u1.setClave(request.getParameter("clave"));
 
-                    dao.insertar(u1);
+    service.guardarUsuario(u1);
+    // Inserta usuario
 
-                    response.sendRedirect("UsuarioServlet");
-                    break;
+    request.getSession().setAttribute("mensaje", "Usuario guardado correctamente");
+    // Guarda el mensaje en sesión
+
+    response.sendRedirect("UsuarioServlet");
+    break;
 
                 case "actualizar":
 
@@ -108,7 +124,11 @@ public class UsuarioServlet extends HttpServlet {
                     u2.setCorreo(request.getParameter("correo"));
                     u2.setClave(request.getParameter("clave"));
 
-                    dao.actualizar(u2);
+                    service.guardarUsuario(u2);
+                    // Actualiza usuario
+
+                    request.getSession().setAttribute("mensaje", "Usuario actualizado correctamente");
+                    // Guarda el mensaje en sesión
 
                     response.sendRedirect("UsuarioServlet");
                     break;
@@ -116,8 +136,13 @@ public class UsuarioServlet extends HttpServlet {
                 case "eliminar":
 
                     int id = Integer.parseInt(request.getParameter("id"));
+                    // Obtiene el ID
 
-                    dao.eliminar(id);
+                    service.eliminarUsuario(id);
+                    // Elimina usuario
+
+                    request.getSession().setAttribute("mensaje", "Usuario eliminado correctamente");
+                    // Guarda el mensaje en sesión
 
                     response.sendRedirect("UsuarioServlet");
                     break;
