@@ -1,6 +1,8 @@
-<!DOCTYPE html>
-<!-- Define que el documento es HTML5 -->
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="java.util.List" %>
+<%@ page import="modelo.Producto" %>
 
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -8,80 +10,112 @@
     <!-- Título de la página -->
     <title>Store Shoe</title>
 
-    <!-- Codificación de caracteres -->
+    <!-- Codificación correcta -->
     <meta charset="UTF-8">
 
     <!-- Responsive -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Cargar Tailwind CSS -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
 </head>
 
 <body class="bg-gray-100">
 
-    <!-- MENÚ -->
-    <nav class="bg-slate-800">
+    <!-- ===================================== -->
+    <!-- 🔹 MENÚ -->
+    <!-- ===================================== -->
+    <!-- Se incluye el menú reutilizable -->
+    <jsp:include page="includes/menu.jsp" />
 
-        <div class="max-w-7xl mx-auto px-4">
+    <!-- ===================================== -->
+    <!-- 🔹 CATÁLOGO DE PRODUCTOS -->
+    <!-- ===================================== -->
+    <div class="max-w-7xl mx-auto mt-10 px-4">
 
-            <div class="flex justify-between items-center h-16">
+        <!-- Título -->
+        <h1 class="text-3xl font-bold text-gray-700 text-center mb-8">
+            Catálogo de Productos
+        </h1>
 
-                <div class="text-white text-xl font-bold">
-                    Ecommers Store Shoe 
-                </div>
+        <%
+            // Obtener lista enviada desde el servlet
+            List<Producto> lista = (List<Producto>) request.getAttribute("productos");
+        %>
 
-                <div class="flex space-x-6">
+        <!-- ===================================== -->
+        <!-- 🔹 VALIDACIÓN: SIN PRODUCTOS -->
+        <!-- ===================================== -->
+        <%
+            if (lista == null || lista.isEmpty()) {
+        %>
 
-                    <a href="${pageContext.request.contextPath}/index.jsp"
-                       class="text-gray-300 hover:text-white">
-                        Inicio
-                    </a>
+            <div class="text-center">
 
-                    <!-- Cambiado para pasar por el Servlet -->
-                    <a href="${pageContext.request.contextPath}/UsuarioServlet?accion=listar"
-                       class="text-gray-300 hover:text-white">
-                        Usuarios
-                    </a>
+                <p class="text-gray-500 text-lg">
+                    No hay productos disponibles
+                </p>
+            </div>
 
-                </div>
+        <%
+            } else {
+        %>
+
+        <!-- ===================================== -->
+        <!-- 🔹 GRID DE PRODUCTOS -->
+        <!-- ===================================== -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+
+            <%
+                for (Producto p : lista) {
+            %>
+
+            <!-- Card de producto -->
+            <div class="bg-white rounded shadow p-4">
+
+                <!-- Imagen del producto -->
+                <img src="${pageContext.request.contextPath}/<%= p.getImagenProducto()%>"
+                     class="w-full h-48 object-cover rounded">
+
+                <!-- Nombre -->
+                <h2 class="text-xl font-bold mt-3">
+                    <%= p.getNombreProducto() %>
+                </h2>
+
+                <!-- Marca -->
+                <p class="text-gray-500">
+                    <%= p.getMarcaProducto() %>
+                </p>
+
+                <!-- Precio -->
+                <p class="text-green-600 font-bold text-lg mt-2">
+                    $<%= p.getPrecioProducto() %>
+                </p>
 
             </div>
 
+            <%
+                }
+            %>
+
         </div>
 
-    </nav>
-
-    <!-- CONTENIDO PRINCIPAL -->
-    <div class="max-w-4xl mx-auto mt-10 text-center">
-
-        <!-- Título -->
-        <h1 class="text-3xl font-bold text-gray-700">
-            Store Shoe
-        </h1>
-
-        <!-- Boton para ir a usuarios -->
-        <!-- Cambiado para pasar por el Servlet -->
-        <a href="UsuarioServlet?accion=listar">
-
-            <a href="${pageContext.request.contextPath}/UsuarioServlet?accion=listar">
-                <button class="mt-6 bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600">
-                    Ver Usuarios
-                </button>
-            </a>
-
-        </a>
+        <%
+            }
+        %>
 
     </div>
 
-    <!-- FOOTER -->
+    <!-- ===================================== -->
+    <!-- 🔹 FOOTER -->
+    <!-- ===================================== -->
     <footer class="bg-slate-800 mt-10">
 
         <div class="max-w-7xl mx-auto px-4 py-6 text-center">
 
             <p class="text-gray-300">
-                Sistema CRUD Usuarios con Java Web
+                Sistema CRUD con Java Web
             </p>
 
             <p class="text-gray-400 text-sm">
