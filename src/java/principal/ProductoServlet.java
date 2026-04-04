@@ -1,12 +1,12 @@
 package principal;
 
-// Modelo y service
+// Modelos y servicios
 import modelo.Producto;
 import modelo.Categoria;
 import service.ProductoService;
 import service.CategoriaService;
 
-// Librerías servlet
+// Librerías Servlet
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -54,6 +54,15 @@ public class ProductoServlet extends HttpServlet {
                 request.getRequestDispatcher("/productos/agregar.jsp").forward(request, response);
                 break;
 
+            case "editar":
+                int id = Integer.parseInt(request.getParameter("id"));
+                Producto producto = productoService.obtenerPorId(id);
+                List<Categoria> categoriasEdit = categoriaService.listar();
+                request.setAttribute("producto", producto);
+                request.setAttribute("categorias", categoriasEdit);
+                request.getRequestDispatcher("/productos/editar.jsp").forward(request, response);
+                break;
+
             default:
                 listarCatalogo(request, response);
                 break;
@@ -70,6 +79,10 @@ public class ProductoServlet extends HttpServlet {
 
         if ("guardar".equals(accion)) {
             guardarProducto(request, response);
+        } else if ("eliminar".equals(accion)) {
+            eliminarProducto(request, response);
+        } else if ("actualizar".equals(accion)) {
+            actualizarProducto(request, response);
         }
     }
 
@@ -87,11 +100,7 @@ public class ProductoServlet extends HttpServlet {
             throws IOException, ServletException {
 
         try {
-
-            System.out.println("ENTRANDO A GUARDAR");
-
             Producto producto = new Producto();
-
             producto.setIdCategoria(Integer.parseInt(request.getParameter("id_categoria")));
             producto.setNombreProducto(request.getParameter("nombre_producto"));
             producto.setMarcaProducto(request.getParameter("marca_producto"));
@@ -99,37 +108,76 @@ public class ProductoServlet extends HttpServlet {
             producto.setPrecioProducto(Double.parseDouble(request.getParameter("precio_producto")));
             producto.setStockProducto(Integer.parseInt(request.getParameter("stock_producto")));
 
-            System.out.println("DATOS OK");
-
-            // Imagen
+            // ================= IMAGEN =================
             Part filePart = request.getPart("imagen_producto");
             if (filePart != null && filePart.getSize() > 0) {
-
                 String nombreArchivo = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-
                 String uploadPath = getServletContext().getRealPath("/img/productos");
 
                 File uploadDir = new File(uploadPath);
-                if (!uploadDir.exists()) {
-                    uploadDir.mkdirs();
-                }
+                if (!uploadDir.exists()) uploadDir.mkdirs();
 
                 filePart.write(uploadPath + File.separator + nombreArchivo);
 
-                producto.setImagenProducto(nombreArchivo);
+                // Guardar ruta completa en la BD
+                producto.setImagenProducto("img/productos/" + nombreArchivo);
             }
 
-            System.out.println("ANTES DE GUARDAR");
-
             productoService.guardar(producto);
-
-            System.out.println("GUARDADO EN BD");
-
-            request.getSession().setAttribute("mensaje", "Producto guardado exitosamente");
             response.sendRedirect("ProductoServlet?accion=listarAdmin");
 
         } catch (Exception e) {
-            e.printStackTrace(); // 🔥 CLAVE: ver el error real
+            e.printStackTrace();
+        }
+    }
+
+    // ================= ELIMINAR PRODUCTO =================
+    private void eliminarProducto(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        int id = Integer.parseInt(request.getParameter("id"));
+        productoService.eliminar(id);
+        response.sendRedirect("ProductoServlet?accion=listarAdmin");
+    }
+
+    // ================= ACTUALIZAR PRODUCTO =================
+    private void actualizarProducto(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        try {
+            Producto producto = new Producto();
+            producto.setIdProducto(Integer.parseInt(request.getParameter("id_producto")));
+            producto.setIdCategoria(Integer.parseInt(request.getParameter("id_categoria")));
+            producto.setNombreProducto(request.getParameter("nombre_producto"));
+            producto.setMarcaProducto(request.getParameter("marca_producto"));
+            producto.setDescripcionProducto(request.getParameter("descripcion_producto"));
+            producto.setPrecioProducto(Double.parseDouble(request.getParameter("precio_producto")));
+            producto.setStockProducto(Integer.parseInt(request.getParameter("stock_producto")));
+
+            // ================= IMAGEN =================
+            Part filePart = request.getPart("imagen_producto");
+            if (filePart != null && filePart.getSize() > 0) {
+                // Subió nueva imagen → guardar ruta completa
+                String nombreArchivo = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+                String uploadPath = getServletContext().getRealPath("/img/productos");
+
+                File uploadDir = new File(uploadPath);
+                if (!uploadDir.exists()) uploadDir.mkdirs();
+
+                filePart.write(uploadPath + File.separator + nombreArchivo);
+                producto.setImagenProducto("img/productos/" + nombreArchivo);
+
+            } else {
+                // No subió imagen → mantener la existente
+                Producto existente = productoService.obtenerPorId(producto.getIdProducto());
+                producto.setImagenProducto(existente.getImagenProducto());
+            }
+
+            productoService.actualizar(producto);
+            response.sendRedirect("ProductoServlet?accion=listarAdmin");
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

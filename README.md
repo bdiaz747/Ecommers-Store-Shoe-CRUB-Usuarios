@@ -15,15 +15,12 @@ El sistema fue desarrollado utilizando **Java Web (Servlets y JSP)**, ejecutado 
 
 # 📌 Características
 
-- Inicio
-- Listado de usuarios
-- Nuevo usuario
-- Edición de usuarios
-- Eliminación de usuarios
-- Conexión a base de datos MySQL
-- Interfaz con Tailwind CSS
-- Implementación del patrón DAO
-- Arquitectura MVC
+- Gestión de usuarios: listar, agregar, editar y eliminar.
+- Gestión de productos: listar, agregar, editar y eliminar.
+- Conexión a base de datos MySQL.
+- Interfaz con Tailwind CSS.
+- Implementación del patrón DAO.
+- Arquitectura MVC.
 
 ---
 
@@ -71,62 +68,46 @@ EcommerceStoreShoe/
 ├── Web Pages/
 │   │
 │   ├── META-INF/
-│   │
 │   ├── WEB-INF/
-│   │
+│   ├── img/                  # imágenes de productos
 │   ├── includes/
 │   │   ├── footer.jsp
 │   │   └── menu.jsp
-│   │
+│   ├── productos/
+│   │   ├── agregar.jsp
+│   │   ├── editar.jsp
+│   │   └── productos.jsp
 │   ├── usuarios/
 │   │   ├── agregar.jsp
 │   │   ├── editar.jsp
 │   │   └── usuarios.jsp
-│   │
 │   └── index.jsp
 │
 ├── Source Packages/
-│   │
 │   ├── conexion/
 │   │   └── ConexionDB.java
-│   │
 │   ├── dao/
+│   │   ├── CategoriaDAO.java
+│   │   ├── ProductoDAO.java
 │   │   └── UsuarioDAO.java
-│   │
 │   ├── modelo/
+│   │   ├── Categoria.java
+│   │   ├── Producto.java
 │   │   └── Usuario.java
-│   │
-│   ├── service/
-│   │   └── UsuarioService.java
-│   │
-│   └── principal/
-│       └── UsuarioServlet.java
+│   ├── principal/
+│   │   ├── ProductoServlet.java
+│   │   └── UsuarioServlet.java
+│   └── service/
+│       ├── CategoriaService.java
+│       ├── ProductoService.java
+│       └── UsuarioService.java
 │
 ├── Libraries/
 │   ├── mysql-connector-j-9.6.0.jar
 │   ├── JDK 25 (Default)
 │   └── Apache Tomcat / TomEE
 │
-└── Configuration Files/
-```
-
-# 🗄 Base de datos
-
-Base de datos utilizada:
-
-```
-eco_store
-```
-
-Creación de la tabla de usuarios:
-
-```sql
-CREATE TABLE usuarios (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100),
-    email VARCHAR(100),
-    clave VARCHAR(100)
-);
+└── Configuration Files/;
 ```
 
 ---
