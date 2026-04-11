@@ -1,12 +1,10 @@
 package principal;
 
-// Modelos y servicios
 import modelo.Producto;
 import modelo.Categoria;
 import service.ProductoService;
 import service.CategoriaService;
 
-// Librerías Servlet
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -15,19 +13,52 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.Part;
 
-// Para listas y manejo de archivos
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
 
-// Configuración para subir archivos
 @MultipartConfig
 @WebServlet(name = "ProductoServlet", urlPatterns = {"/ProductoServlet"})
 public class ProductoServlet extends HttpServlet {
 
     ProductoService productoService = new ProductoService();
     CategoriaService categoriaService = new CategoriaService();
+
+    // ================= VALIDACIÓN CENTRAL =================
+    private String validar(String nombre, String descripcion, String precioStr) {
+
+        // 1. TEXTO
+        if (nombre == null || nombre.trim().isEmpty() ||
+            descripcion == null || descripcion.trim().isEmpty()) {
+            return "Nombre y descripción obligatorios";
+        }
+
+        if (nombre.trim().length() < 3 || nombre.trim().length() > 50) {
+            return "Nombre entre 3 y 50 caracteres";
+        }
+
+        if (!nombre.matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9 .,_-]+$")) {
+            return "Nombre con caracteres inválidos";
+        }
+
+        // 2. SEGURIDAD
+        if (nombre.toLowerCase().contains("<script>") ||
+            descripcion.toLowerCase().contains("<script>") ||
+            nombre.contains("<") || descripcion.contains("<")) {
+            return "Entrada no permitida (HTML/script)";
+        }
+
+        // 3. PRECIO
+        try {
+            double precio = Double.parseDouble(precioStr);
+            if (precio <= 0) return "Precio debe ser mayor a 0";
+        } catch (Exception e) {
+            return "Precio inválido";
+        }
+
+        return null;
+    }
 
     // ================= GET =================
     @Override
@@ -43,29 +74,24 @@ public class ProductoServlet extends HttpServlet {
                 break;
 
             case "listarAdmin":
-                List<Producto> lista = productoService.listar();
-                request.setAttribute("productos", lista);
+                request.setAttribute("productos", productoService.listar());
                 request.getRequestDispatcher("/productos/productos.jsp").forward(request, response);
                 break;
 
             case "nuevo":
-                List<Categoria> categorias = categoriaService.listar();
-                request.setAttribute("categorias", categorias);
+                request.setAttribute("categorias", categoriaService.listar());
                 request.getRequestDispatcher("/productos/agregar.jsp").forward(request, response);
                 break;
 
             case "editar":
                 int id = Integer.parseInt(request.getParameter("id"));
-                Producto producto = productoService.obtenerPorId(id);
-                List<Categoria> categoriasEdit = categoriaService.listar();
-                request.setAttribute("producto", producto);
-                request.setAttribute("categorias", categoriasEdit);
+                request.setAttribute("producto", productoService.obtenerPorId(id));
+                request.setAttribute("categorias", categoriaService.listar());
                 request.getRequestDispatcher("/productos/editar.jsp").forward(request, response);
                 break;
 
             default:
                 listarCatalogo(request, response);
-                break;
         }
     }
 
@@ -75,55 +101,59 @@ public class ProductoServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String accion = request.getParameter("accion");
-        if (accion == null) accion = "guardar";
 
         if ("guardar".equals(accion)) {
             guardarProducto(request, response);
-        } else if ("eliminar".equals(accion)) {
-            eliminarProducto(request, response);
         } else if ("actualizar".equals(accion)) {
             actualizarProducto(request, response);
+        } else if ("eliminar".equals(accion)) {
+            eliminarProducto(request, response);
         }
     }
 
-    // ================= LISTAR CATÁLOGO =================
+    // ================= LISTAR =================
     private void listarCatalogo(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        List<Producto> lista = productoService.listar();
-        request.setAttribute("productos", lista);
+        request.setAttribute("productos", productoService.listar());
         request.getRequestDispatcher("/index.jsp").forward(request, response);
     }
 
-    // ================= GUARDAR PRODUCTO =================
+    // ================= GUARDAR =================
     private void guardarProducto(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
 
-        try {
-            Producto producto = new Producto();
-            producto.setIdCategoria(Integer.parseInt(request.getParameter("id_categoria")));
-            producto.setNombreProducto(request.getParameter("nombre_producto"));
-            producto.setMarcaProducto(request.getParameter("marca_producto"));
-            producto.setDescripcionProducto(request.getParameter("descripcion_producto"));
-            producto.setPrecioProducto(Double.parseDouble(request.getParameter("precio_producto")));
-            producto.setStockProducto(Integer.parseInt(request.getParameter("stock_producto")));
+        String nombre = request.getParameter("nombre_producto");
+        String descripcion = request.getParameter("descripcion_producto");
+        String precioStr = request.getParameter("precio_producto");
 
-            // ================= IMAGEN =================
+        String error = validar(nombre, descripcion, precioStr);
+
+        if (error != null) {
+            request.setAttribute("error", error);
+            request.getRequestDispatcher("/productos/agregar.jsp").forward(request, response);
+            return;
+        }
+
+        try {
+            Producto p = new Producto();
+            p.setIdCategoria(Integer.parseInt(request.getParameter("id_categoria")));
+            p.setNombreProducto(nombre.trim());
+            p.setMarcaProducto(request.getParameter("marca_producto"));
+            p.setDescripcionProducto(descripcion.trim());
+            p.setPrecioProducto(Double.parseDouble(precioStr));
+            p.setStockProducto(Integer.parseInt(request.getParameter("stock_producto")));
+
             Part filePart = request.getPart("imagen_producto");
             if (filePart != null && filePart.getSize() > 0) {
                 String nombreArchivo = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-                String uploadPath = getServletContext().getRealPath("/img/productos");
-
-                File uploadDir = new File(uploadPath);
-                if (!uploadDir.exists()) uploadDir.mkdirs();
-
-                filePart.write(uploadPath + File.separator + nombreArchivo);
-
-                // Guardar ruta completa en la BD
-                producto.setImagenProducto("img/productos/" + nombreArchivo);
+                String path = getServletContext().getRealPath("/img/productos");
+                new File(path).mkdirs();
+                filePart.write(path + File.separator + nombreArchivo);
+                p.setImagenProducto("img/productos/" + nombreArchivo);
             }
 
-            productoService.guardar(producto);
+            productoService.guardar(p);
             response.sendRedirect("ProductoServlet?accion=listarAdmin");
 
         } catch (Exception e) {
@@ -131,53 +161,59 @@ public class ProductoServlet extends HttpServlet {
         }
     }
 
-    // ================= ELIMINAR PRODUCTO =================
+    // ================= ACTUALIZAR =================
+    private void actualizarProducto(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+
+        String nombre = request.getParameter("nombre_producto");
+        String descripcion = request.getParameter("descripcion_producto");
+        String precioStr = request.getParameter("precio_producto");
+
+        String error = validar(nombre, descripcion, precioStr);
+
+        if (error != null) {
+            request.setAttribute("error", error);
+            request.getRequestDispatcher("/productos/editar.jsp").forward(request, response);
+            return;
+        }
+
+        try {
+            Producto p = new Producto();
+            p.setIdProducto(Integer.parseInt(request.getParameter("id_producto")));
+            p.setIdCategoria(Integer.parseInt(request.getParameter("id_categoria")));
+            p.setNombreProducto(nombre.trim());
+            p.setMarcaProducto(request.getParameter("marca_producto"));
+            p.setDescripcionProducto(descripcion.trim());
+            p.setPrecioProducto(Double.parseDouble(precioStr));
+            p.setStockProducto(Integer.parseInt(request.getParameter("stock_producto")));
+
+            Part filePart = request.getPart("imagen_producto");
+
+            if (filePart != null && filePart.getSize() > 0) {
+                String nombreArchivo = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+                String path = getServletContext().getRealPath("/img/productos");
+                new File(path).mkdirs();
+                filePart.write(path + File.separator + nombreArchivo);
+                p.setImagenProducto("img/productos/" + nombreArchivo);
+            } else {
+                Producto existente = productoService.obtenerPorId(p.getIdProducto());
+                p.setImagenProducto(existente.getImagenProducto());
+            }
+
+            productoService.actualizar(p);
+            response.sendRedirect("ProductoServlet?accion=listarAdmin");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ================= ELIMINAR =================
     private void eliminarProducto(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
         int id = Integer.parseInt(request.getParameter("id"));
         productoService.eliminar(id);
         response.sendRedirect("ProductoServlet?accion=listarAdmin");
-    }
-
-    // ================= ACTUALIZAR PRODUCTO =================
-    private void actualizarProducto(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-
-        try {
-            Producto producto = new Producto();
-            producto.setIdProducto(Integer.parseInt(request.getParameter("id_producto")));
-            producto.setIdCategoria(Integer.parseInt(request.getParameter("id_categoria")));
-            producto.setNombreProducto(request.getParameter("nombre_producto"));
-            producto.setMarcaProducto(request.getParameter("marca_producto"));
-            producto.setDescripcionProducto(request.getParameter("descripcion_producto"));
-            producto.setPrecioProducto(Double.parseDouble(request.getParameter("precio_producto")));
-            producto.setStockProducto(Integer.parseInt(request.getParameter("stock_producto")));
-
-            // ================= IMAGEN =================
-            Part filePart = request.getPart("imagen_producto");
-            if (filePart != null && filePart.getSize() > 0) {
-                // Subió nueva imagen → guardar ruta completa
-                String nombreArchivo = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-                String uploadPath = getServletContext().getRealPath("/img/productos");
-
-                File uploadDir = new File(uploadPath);
-                if (!uploadDir.exists()) uploadDir.mkdirs();
-
-                filePart.write(uploadPath + File.separator + nombreArchivo);
-                producto.setImagenProducto("img/productos/" + nombreArchivo);
-
-            } else {
-                // No subió imagen → mantener la existente
-                Producto existente = productoService.obtenerPorId(producto.getIdProducto());
-                producto.setImagenProducto(existente.getImagenProducto());
-            }
-
-            productoService.actualizar(producto);
-            response.sendRedirect("ProductoServlet?accion=listarAdmin");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

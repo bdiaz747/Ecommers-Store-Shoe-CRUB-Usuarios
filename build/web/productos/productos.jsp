@@ -1,48 +1,44 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="modelo.Producto" %>
 <%@ page import="java.util.List" %>
 
 <!DOCTYPE html>
-
 <html>
 
 <head>
-
-    <!-- Título de la pestaña -->
     <title>Productos</title>
-
-    <!-- Tailwind CSS -->
+    <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
-
 </head>
 
 <body class="bg-gray-100">
 
-    <!-- ============================= -->
-    <!-- MENÚ DEL SISTEMA -->
-    <!-- ============================= -->
+    <!-- MENÃš -->
     <jsp:include page="../includes/menu.jsp" />
 
+    <!-- ðŸ”’ FUNCIÃ“N SEGURA -->
+    <%! 
+        public String escapar(String texto) {
+            if (texto == null) return "";
+            return texto
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#x27;");
+        }
+    %>
 
-    <!-- ============================= -->
-    <!-- OBTENER LISTA DESDE EL SERVLET -->
-    <!-- ============================= -->
     <%
-        // Recibe los productos enviados desde el servlet
         List<Producto> lista = (List<Producto>) request.getAttribute("productos");
     %>
 
+    <div class="max-w-10xl mx-auto mt-10 bg-white p-8 rounded shadow">
 
-    <!-- ============================= -->
-    <!-- CONTENEDOR PRINCIPAL -->
-    <!-- ============================= -->
-    <div class="max-w-5xl mx-auto mt-10 bg-white p-8 rounded shadow">
-
-        <!-- TÍTULO -->
         <h1 class="text-3xl font-bold text-blue-600 mb-6">
             Productos
         </h1>
 
-        <!-- BOTÓN CREAR (aún no conectado) -->
         <a href="ProductoServlet?accion=nuevo">
             <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
                 Crear nuevo producto
@@ -51,18 +47,15 @@
 
         <br><br>
 
-        <!-- ============================= -->
-        <!-- TABLA DE PRODUCTOS -->
-        <!-- ============================= -->
         <table class="min-w-full border border-gray-200">
 
-            <!-- ENCABEZADOS -->
+            <!-- HEADER -->
             <tr class="bg-gray-200">
                 <th class="px-4 py-2 text-left">ID</th>
-                <th class="px-4 py-2 text-left">Categoría</th>
+                <th class="px-4 py-2 text-left">CategorÃ­a</th>
                 <th class="px-4 py-2 text-left">Nombre</th>
                 <th class="px-4 py-2 text-left">Marca</th>
-                <th class="px-4 py-2 text-left">Descripción</th>
+                <th class="px-4 py-2 text-left">DescripciÃ³n</th>
                 <th class="px-4 py-2 text-left">Precio</th>
                 <th class="px-4 py-2 text-left">Stock</th>
                 <th class="px-4 py-2 text-left">Imagen</th>
@@ -70,55 +63,47 @@
             </tr>
 
             <%
-                // Verifica si hay productos
                 if (lista != null && !lista.isEmpty()) {
-
-                    // Recorre cada producto
                     for (Producto p : lista) {
             %>
 
-            <tr class="border-t">
+            <!-- FILA -->
+            <tr class="border-t hover:bg-gray-50">
 
-                <!-- DATOS DEL PRODUCTO -->
                 <td class="px-4 py-2"><%= p.getIdProducto() %></td>
                 <td class="px-4 py-2"><%= p.getIdCategoria() %></td>
-                <td class="px-4 py-2"><%= p.getNombreProducto() %></td>
-                <td class="px-4 py-2"><%= p.getMarcaProducto() %></td>
-                <td class="px-4 py-2"><%= p.getDescripcionProducto() %></td>
+
+                <!-- ðŸ”’ TEXTO SEGURO -->
+                <td class="px-4 py-2"><%= escapar(p.getNombreProducto()) %></td>
+                <td class="px-4 py-2"><%= escapar(p.getMarcaProducto()) %></td>
+                <td class="px-4 py-2"><%= escapar(p.getDescripcionProducto()) %></td>
+
                 <td class="px-4 py-2">$ <%= p.getPrecioProducto() %></td>
                 <td class="px-4 py-2"><%= p.getStockProducto() %></td>
-                <td class="px-4 py-2"><%= p.getImagenProducto() %></td>
 
-                <!-- ============================= -->
+                <td class="px-4 py-2"><%= escapar(p.getImagenProducto()) %></td>
+
                 <!-- ACCIONES -->
-                <!-- ============================= -->
                 <td class="px-4 py-2">
 
                     <!-- EDITAR -->
-                    <!-- Envía el ID por URL al servlet -->
                     <a href="ProductoServlet?accion=editar&id=<%=p.getIdProducto()%>"
-                       class="text-blue-500 hover:underline">
+                       class="text-blue-500 hover:underline font-semibold">
                         Editar
                     </a>
 
                     |
 
                     <!-- ELIMINAR -->
-                    <!-- Formulario POST para eliminar -->
                     <form action="ProductoServlet" method="POST" style="display:inline">
-
-                        <!-- ID del producto -->
                         <input type="hidden" name="id" value="<%=p.getIdProducto()%>">
-
-                        <!-- Acción eliminar -->
                         <input type="hidden" name="accion" value="eliminar">
 
-                        <!-- Botón eliminar -->
                         <input 
                             type="submit" 
                             value="Eliminar"
-                            class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                            onclick="return confirm('¿Seguro que deseas eliminar este producto?')">
+                            class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 ml-2"
+                            onclick="return confirm('Â¿Seguro que deseas eliminar este producto?')">
                     </form>
 
                 </td>
@@ -130,7 +115,7 @@
                 } else {
             %>
 
-            <!-- MENSAJE SI NO HAY PRODUCTOS -->
+            <!-- SIN DATOS -->
             <tr>
                 <td colspan="9" class="px-4 py-2 text-center text-gray-500">
                     No hay productos
@@ -145,12 +130,8 @@
 
     </div>
 
-
-    <!-- ============================= -->
     <!-- FOOTER -->
-    <!-- ============================= -->
     <jsp:include page="../includes/footer.jsp" />
 
 </body>
-
 </html>

@@ -1,32 +1,22 @@
 package dao;
 
-// Conexión a la base de datos
 import conexion.ConexionDB;
-
-// Modelo Producto
 import modelo.Producto;
 
-// Librerías JDBC
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-// Listas
 import java.util.ArrayList;
 import java.util.List;
 
-// DAO: maneja acceso a datos (BD)
 public class ProductoDAO {
 
-    Connection conn;            // conexión a la BD
-    PreparedStatement ps;       // consultas preparadas
-    ResultSet rs;               // resultados de SELECT
+    Connection conn;
+    PreparedStatement ps;
+    ResultSet rs;
 
-
-    // =====================================================
-    // 🔹 INSERTAR PRODUCTO
-    // =====================================================
-    // Inserta un nuevo producto en la base de datos
+    // ================= INSERTAR =================
     public void agregarProducto(Producto producto) {
 
         String sql = "INSERT INTO producto (id_categoria, nombre_producto, marca_producto, descripcion_producto, precio_producto, stock_producto, imagen_producto) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -47,14 +37,13 @@ public class ProductoDAO {
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try { if (ps != null) ps.close(); } catch (Exception e) {}
+            try { if (conn != null) conn.close(); } catch (Exception e) {}
         }
     }
 
-
-    // =====================================================
-    // 🔹 LISTAR PRODUCTOS
-    // =====================================================
-    // Obtiene todos los productos de la base de datos
+    // ================= LISTAR =================
     public List<Producto> listarProductos() {
 
         List<Producto> lista = new ArrayList<>();
@@ -83,16 +72,16 @@ public class ProductoDAO {
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try { if (rs != null) rs.close(); } catch (Exception e) {}
+            try { if (ps != null) ps.close(); } catch (Exception e) {}
+            try { if (conn != null) conn.close(); } catch (Exception e) {}
         }
 
         return lista;
     }
 
-
-    // =====================================================
-    // 🔹 ELIMINAR PRODUCTO
-    // =====================================================
-    // Elimina un producto de la base de datos por su ID
+    // ================= ELIMINAR =================
     public void eliminarProducto(int id) {
 
         String sql = "DELETE FROM producto WHERE id_producto = ?";
@@ -102,20 +91,17 @@ public class ProductoDAO {
             ps = conn.prepareStatement(sql);
 
             ps.setInt(1, id);
-
             ps.executeUpdate();
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try { if (ps != null) ps.close(); } catch (Exception e) {}
+            try { if (conn != null) conn.close(); } catch (Exception e) {}
         }
     }
 
-
-    // =====================================================
-    // 🔹 OBTENER PRODUCTO POR ID
-    // =====================================================
-    // Busca un producto específico por su ID
-    // Se utiliza para cargar datos en el formulario de edición
+    // ================= OBTENER POR ID =================
     public Producto obtenerProductoPorId(int id) {
 
         Producto producto = null;
@@ -126,7 +112,6 @@ public class ProductoDAO {
             ps = conn.prepareStatement(sql);
 
             ps.setInt(1, id);
-
             rs = ps.executeQuery();
 
             if (rs.next()) {
@@ -145,16 +130,16 @@ public class ProductoDAO {
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try { if (rs != null) rs.close(); } catch (Exception e) {}
+            try { if (ps != null) ps.close(); } catch (Exception e) {}
+            try { if (conn != null) conn.close(); } catch (Exception e) {}
         }
 
         return producto;
     }
 
-
-    // =====================================================
-    // 🔹 ACTUALIZAR PRODUCTO
-    // =====================================================
-    // Actualiza los datos de un producto existente en la BD
+    // ================= ACTUALIZAR =================
     public void actualizarProducto(Producto producto) {
 
         String sql = "UPDATE producto SET id_categoria = ?, nombre_producto = ?, marca_producto = ?, descripcion_producto = ?, precio_producto = ?, stock_producto = ?, imagen_producto = ? WHERE id_producto = ?";
@@ -176,6 +161,9 @@ public class ProductoDAO {
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try { if (ps != null) ps.close(); } catch (Exception e) {}
+            try { if (conn != null) conn.close(); } catch (Exception e) {}
         }
     }
 }
